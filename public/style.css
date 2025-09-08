@@ -1,0 +1,98 @@
+body {
+    background-color: #f8f9fa;
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+}
+
+.navbar-brand {
+    font-weight: 600;
+}
+
+.card {
+    border: none;
+    border-radius: 10px;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    margin-bottom: 20px;
+}
+
+.card-header {
+    border-radius: 10px 10px 0 0 !important;
+    font-weight: 600;
+}
+
+.form-check-label {
+    cursor: pointer;
+    transition: all 0.2s;
+}
+
+.form-check-label:hover {
+    color: #0d6efd;
+}
+
+.btn-primary {
+    background-color: #0d6efd;
+    border-color: #0d6efd;
+    border-radius: 8px;
+    padding: 10px 20px;
+    font-weight: 600;
+    transition: all 0.3s;
+}
+
+.btn-primary:hover {
+    background-color: #0b5ed7;
+    border-color: #0a58ca;
+    transform: translateY(-2px);
+}
+
+.toast {
+    border-radius: 8px;
+}
+
+.platform-check:checked + .form-check-label {
+    font-weight: 600;
+    color: #0d6efd;
+}
+
+#facebookProfile:checked + .form-check-label {
+    color: #3b5998;
+}
+
+#facebookPage:checked + .form-check-label {
+    color: #3b5998;
+}
+
+#facebookGroup:checked + .form-check-label {
+    color: #3b5998;
+}
+
+#instagram:checked + .form-check-label {
+    color: #e4405f;
+}
+
+#twitter:checked + .form-check-label {
+    color: #1da1f2;
+}
+
+#linkedin:checked + .form-check-label {
+    color: #0077b5;
+}
+
+#youtube:checked + .form-check-label {
+    color: #ff0000;
+}
+
+#tiktok:checked + .form-check-label {
+    color: #000000;
+}
+
+#whatsapp:checked + .form-check-label {
+    color: #25d366;
+}
+
+textarea {
+    resize: vertical;
+    min-height: 120px;
+}
+
+#upcomingPosts, #recentActivity {
+    transition: all 0.3s;
+}

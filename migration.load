@@ -1,0 +1,7 @@
+LOAD DATABASE
+    FROM sqlite:///./database.sqlite
+    INTO postgresql://neondb_owner:endpoint=ep-jolly-art-adqtd17d;npg_BTiU1oQyENe0@ep-jolly-art-adqtd17d-pooler.us-east-1.aws.neon.tech/neondb?sslmode=require
+
+WITH include drop, create tables, create indexes, reset sequences, foreign keys
+
+SET work_mem to '16MB', maintenance_work_mem to '512MB';

@@ -1,0 +1,197 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Social Media Manager</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <nav class="navbar navbar-dark bg-primary">
+        <div class="container">
+            <span class="navbar-brand mb-0 h1">
+                <i class="fas fa-share-alt me-2"></i>Social Media Manager
+            </span>
+        </div>
+    </nav>
+
+    <div class="container mt-4">
+        <div class="row">
+            <div class="col-md-8">
+                <div class="card">
+                    <div class="card-header bg-light">
+                        <h5 class="mb-0">Create New Post</h5>
+                    </div>
+                    <div class="card-body">
+                        <form id="postForm">
+                            <div class="mb-3">
+                                <label for="content" class="form-label">Post Content</label>
+                                <textarea class="form-control" id="content" rows="5" placeholder="What would you like to post?" required></textarea>
+                            </div>
+                            
+                            <div class="mb-3">
+                                <label class="form-label">Media Attachment</label>
+                                
+                                <!-- URL Input -->
+                                <div class="mb-2">
+                                    <input type="text" class="form-control" id="mediaUrl" placeholder="Or enter a media URL (https://...)">
+                                </div>
+                                
+                                <!-- File Upload -->
+                                <div class="input-group mb-2">
+                                    <input type="file" class="form-control" id="mediaFile" accept="image/*, video/*" multiple>
+                                    <button class="btn btn-outline-secondary" type="button" id="uploadButton">
+                                        <i class="fas fa-upload me-1"></i>Upload
+                                    </button>
+                                </div>
+                                
+                                <!-- Upload Progress Bar -->
+                                <div class="progress mb-2" id="uploadProgress" style="display: none; height: 20px;">
+                                    <div class="progress-bar progress-bar-striped progress-bar-animated" role="progressbar" style="width: 0%;" id="progressBar">0%</div>
+                                </div>
+                                
+                                <!-- Media Preview Area -->
+                                <div id="mediaPreview" class="mt-2 border rounded p-2" style="display: none;">
+                                    <p class="mb-1"><strong>Preview:</strong></p>
+                                    <div id="previewContainer"></div>
+                                    <button type="button" class="btn btn-sm btn-danger mt-2" id="removeMedia">
+                                        <i class="fas fa-times me-1"></i>Remove
+                                    </button>
+                                </div>
+                                
+                                <div class="form-text">
+                                    Upload images or videos from your computer, or provide a URL.
+                                </div>
+                            </div>
+                            
+                            <div class="mb-3">
+                                <label class="form-label">Select Platforms:</label>
+                                <div class="row">
+                                    <div class="col-md-6">
+                                        <div class="form-check mb-2">
+                                            <input class="form-check-input platform-check" type="checkbox" id="facebookProfile" value="facebook_profile">
+                                            <label class="form-check-label" for="facebookProfile">
+                                                <i class="fab fa-facebook text-primary me-1"></i> Facebook Profile
+                                            </label>
+                                        </div>
+                                        <div class="form-check mb-2">
+                                            <input class="form-check-input platform-check" type="checkbox" id="facebookPage" value="facebook_page">
+                                            <label class="form-check-label" for="facebookPage">
+                                                <i class="fab fa-facebook text-primary me-1"></i> Facebook Page
+                                            </label>
+                                        </div>
+                                        <div class="form-check mb-2">
+                                            <input class="form-check-input platform-check" type="checkbox" id="facebookGroup" value="facebook_group">
+                                            <label class="form-check-label" for="facebookGroup">
+                                                <i class="fab fa-facebook text-primary me-1"></i> Facebook Group
+                                            </label>
+                                        </div>
+                                        <div class="form-check mb-2">
+                                            <input class="form-check-input platform-check" type="checkbox" id="instagram" value="instagram">
+                                            <label class="form-check-label" for="instagram">
+                                                <i class="fab fa-instagram text-danger me-1"></i> Instagram
+                                            </label>
+                                        </div>
+                                        <div class="form-check mb-2">
+                                            <input class="form-check-input platform-check" type="checkbox" id="twitter" value="twitter">
+                                            <label class="form-check-label" for="twitter">
+                                                <i class="fab fa-twitter text-info me-1"></i> Twitter
+                                            </label>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-6">
+                                        <div class="form-check mb-2">
+                                            <input class="form-check-input platform-check" type="checkbox" id="linkedin" value="linkedin">
+                                            <label class="form-check-label" for="linkedin">
+                                                <i class="fab fa-linkedin text-primary me-1"></i> LinkedIn
+                                            </label>
+                                        </div>
+                                        <div class="form-check mb-2">
+                                            <input class="form-check-input platform-check" type="checkbox" id="youtube" value="youtube">
+                                            <label class="form-check-label" for="youtube">
+                                                <i class="fab fa-youtube text-danger me-1"></i> YouTube
+                                            </label>
+                                        </div>
+                                        <div class="form-check mb-2">
+                                            <input class="form-check-input platform-check" type="checkbox" id="tiktok" value="tiktok">
+                                            <label class="form-check-label" for="tiktok">
+                                                <i class="fab fa-tiktok me-1"></i> TikTok
+                                            </label>
+                                        </div>
+                                        <div class="form-check mb-2">
+                                            <input class="form-check-input platform-check" type="checkbox" id="whatsapp" value="whatsapp">
+                                            <label class="form-check-label" for="whatsapp">
+                                                <i class="fab fa-whatsapp text-success me-1"></i> WhatsApp
+                                            </label>
+                                        </div>
+                                        <div class="form-check mb-2">
+                                            <input class="form-check-input" type="checkbox" id="selectAll">
+                                            <label class="form-check-label" for="selectAll">
+                                                <strong>Select All Platforms</strong>
+                                            </label>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <div class="mb-3">
+                                <label for="scheduleTime" class="form-label">Schedule Date & Time</label>
+                                <input type="datetime-local" class="form-control" id="scheduleTime" required>
+                            </div>
+                            
+                            <button type="submit" class="btn btn-primary w-100">
+                                <i class="fas fa-calendar-plus me-2"></i>Schedule Post
+                            </button>
+                        </form>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="col-md-4">
+                <div class="card">
+                    <div class="card-header bg-light">
+                        <h5 class="mb-0">Upcoming Posts</h5>
+                    </div>
+                    <div class="card-body">
+                        <div id="upcomingPosts" class="d-flex justify-content-center align-items-center" style="min-height: 100px;">
+                            <div class="text-center text-muted">
+                                <i class="fas fa-inbox fa-2x mb-2"></i>
+                                <p>No scheduled posts</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="card mt-4">
+                    <div class="card-header bg-light">
+                        <h5 class="mb-0">Recent Activity</h5>
+                    </div>
+                    <div class="card-body">
+                        <div id="recentActivity" class="d-flex justify-content-center align-items-center" style="min-height: 100px;">
+                            <div class="text-center text-muted">
+                                <i class="fas fa-history fa-2x mb-2"></i>
+                                <p>No recent activity</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="position-fixed bottom-0 end-0 p-3" style="z-index: 11">
+        <div id="liveToast" class="toast hide" role="alert" aria-live="assertive" aria-atomic="true">
+            <div class="toast-header">
+                <strong class="me-auto">Notification</strong>
+                <button type="button" class="btn-close" data-bs-dismiss="toast" aria-label="Close"></button>
+            </div>
+            <div class="toast-body" id="toastMessage"></div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="script.js"></script>
+</body>
+</html>
