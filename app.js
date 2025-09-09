@@ -14,6 +14,24 @@ app.use('/api/posts', require('./routes/posts'));
 app.use('/api/auth', require('./routes/socialAuth'));
 app.use('/api/upload', require('./routes/upload'));
 
+// Add this after your other app.use() routes
+app.get('/api/test-db', async (req, res) => {
+  try {
+    const result = await query('SELECT NOW() as current_time');
+    res.json({ 
+      success: true, 
+      message: 'Database connection successful',
+      time: result.rows[0].current_time 
+    });
+  } catch (error) {
+    res.json({ 
+      success: false, 
+      message: 'Database connection failed',
+      error: error.message 
+    });
+  }
+});
+
 // Health check endpoint
 app.get('/api/health', (req, res) => {
   res.json({ message: 'Social Media Manager API is running!' });
