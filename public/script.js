@@ -256,4 +256,10 @@ document.addEventListener('DOMContentLoaded', function() {
     // Load initial data
     loadUpcomingPosts();
     loadRecentActivity();
+    
+    // Set minimum datetime for schedule input to current time
+    const now = new Date();
+    const timezoneOffset = now.getTimezoneOffset() * 60000;
+    const localISOTime = new Date(now - timezoneOffset).toISOString().slice(0, 16);
+    document.getElementById('scheduleTime').min = localISOTime;
 });
