@@ -1,33 +1,19 @@
-const express = require('express');
-import axios from 'axios';
+import express from 'express';
 const router = express.Router();
 
-// Route to initiate Facebook authentication
+// Simple placeholder for social auth routes
+// We'll implement actual social media APIs later
+
 router.get('/facebook', (req, res) => {
-    const facebookLoginUrl = `https://www.facebook.com/v19.0/dialog/oauth?client_id=${process.env.FB_APP_ID}&redirect_uri=${process.env.FB_REDIRECT_URI}&scope=pages_manage_posts,pages_read_engagement,business_management`;
-    res.redirect(facebookLoginUrl);
+  res.json({ message: 'Facebook auth will be implemented soon' });
 });
 
-// Route to handle Facebook callback
-router.get('/facebook/callback', async (req, res) => {
-    try {
-        const { code } = req.query;
-
-        // Exchange code for access token
-        const tokenResponse = await axios.get(`https://graph.facebook.com/v19.0/oauth/access_token?client_id=${process.env.FB_APP_ID}&redirect_uri=${process.env.FB_REDIRECT_URI}&client_secret=${process.env.FB_APP_SECRET}&code=${code}`);
-        const userAccessToken = tokenResponse.data.access_token;
-
-        // Use the User Token to get Page Access Token
-        const pageResponse = await axios.get(`https://graph.facebook.com/me/accounts?access_token=${userAccessToken}`);
-        const pageAccessToken = pageResponse.data.data[0].access_token; // Gets the first page
-
-        // TODO: Save pageAccessToken to database
-
-        res.send('Your Facebook Page was connected successfully! You can now schedule posts to it.');
-    } catch (error) {
-        console.error('Facebook OAuth error:', error.response.data);
-        res.status(500).send('Authentication failed');
-    }
+router.get('/twitter', (req, res) => {
+  res.json({ message: 'Twitter auth will be implemented soon' });
 });
 
-module.exports = router;
+router.get('/instagram', (req, res) => {
+  res.json({ message: 'Instagram auth will be implemented soon' });
+});
+
+export default router;
