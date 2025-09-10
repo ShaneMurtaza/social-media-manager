@@ -1,5 +1,5 @@
 const express = require('express');
-const axios = require('axios');
+import axios from 'axios';
 const router = express.Router();
 
 // Route to initiate Facebook authentication
