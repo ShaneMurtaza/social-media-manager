@@ -9,185 +9,452 @@
     <link rel="stylesheet" href="style.css">
 </head>
 <body>
-    <nav class="navbar navbar-dark bg-primary">
-        <div class="container">
-            <span class="navbar-brand mb-0 h1">
-                <i class="fas fa-share-alt me-2"></i>Social Media Manager
-            </span>
-        </div>
-    </nav>
-
-    <div class="container mt-4">
-        <div class="row">
-            <div class="col-md-8">
-                <div class="card">
-                    <div class="card-header bg-light">
-                        <h5 class="mb-0">Create New Post</h5>
-                    </div>
-                    <div class="card-body">
-                        <form id="postForm">
-                            <div class="mb-3">
-                                <label for="content" class="form-label">Post Content</label>
-                                <textarea class="form-control" id="content" rows="5" placeholder="What would you like to post?" required></textarea>
-                            </div>
-                            
-                            <div class="mb-3">
-                                <label class="form-label">Media Attachment</label>
-                                
-                                <!-- URL Input -->
-                                <div class="mb-2">
-                                    <input type="text" class="form-control" id="mediaUrl" placeholder="Or enter a media URL (https://...)">
-                                </div>
-                                
-                                <!-- File Upload -->
-                                <div class="input-group mb-2">
-                                    <input type="file" class="form-control" id="mediaFile" accept="image/*, video/*" multiple>
-                                    <button class="btn btn-outline-secondary" type="button" id="uploadButton">
-                                        <i class="fas fa-upload me-1"></i>Upload
-                                    </button>
-                                </div>
-                                
-                                <!-- Upload Progress Bar -->
-                                <div class="progress mb-2" id="uploadProgress" style="display: none; height: 20px;">
-                                    <div class="progress-bar progress-bar-striped progress-bar-animated" role="progressbar" style="width: 0%;" id="progressBar">0%</div>
-                                </div>
-                                
-                                <!-- Media Preview Area -->
-                                <div id="mediaPreview" class="mt-2 border rounded p-2" style="display: none;">
-                                    <p class="mb-1"><strong>Preview:</strong></p>
-                                    <div id="previewContainer"></div>
-                                    <button type="button" class="btn btn-sm btn-danger mt-2" id="removeMedia">
-                                        <i class="fas fa-times me-1"></i>Remove
-                                    </button>
-                                </div>
-                                
-                                <div class="form-text">
-                                    Upload images or videos from your computer, or provide a URL.
-                                </div>
-                            </div>
-                            
-                            <div class="mb-3">
-                                <label class="form-label">Select Platforms:</label>
-                                <div class="row">
-                                    <div class="col-md-6">
-                                        <div class="form-check mb-2">
-                                            <input class="form-check-input platform-check" type="checkbox" id="facebookProfile" value="facebook_profile">
-                                            <label class="form-check-label" for="facebookProfile">
-                                                <i class="fab fa-facebook text-primary me-1"></i> Facebook Profile
-                                            </label>
-                                        </div>
-                                        <div class="form-check mb-2">
-                                            <input class="form-check-input platform-check" type="checkbox" id="facebookPage" value="facebook_page">
-                                            <label class="form-check-label" for="facebookPage">
-                                                <i class="fab fa-facebook text-primary me-1"></i> Facebook Page
-                                            </label>
-                                        </div>
-                                        <div class="form-check mb-2">
-                                            <input class="form-check-input platform-check" type="checkbox" id="facebookGroup" value="facebook_group">
-                                            <label class="form-check-label" for="facebookGroup">
-                                                <i class="fab fa-facebook text-primary me-1"></i> Facebook Group
-                                            </label>
-                                        </div>
-                                        <div class="form-check mb-2">
-                                            <input class="form-check-input platform-check" type="checkbox" id="instagram" value="instagram">
-                                            <label class="form-check-label" for="instagram">
-                                                <i class="fab fa-instagram text-danger me-1"></i> Instagram
-                                            </label>
-                                        </div>
-                                        <div class="form-check mb-2">
-                                            <input class="form-check-input platform-check" type="checkbox" id="twitter" value="twitter">
-                                            <label class="form-check-label" for="twitter">
-                                                <i class="fab fa-twitter text-info me-1"></i> Twitter
-                                            </label>
-                                        </div>
-                                    </div>
-                                    <div class="col-md-6">
-                                        <div class="form-check mb-2">
-                                            <input class="form-check-input platform-check" type="checkbox" id="linkedin" value="linkedin">
-                                            <label class="form-check-label" for="linkedin">
-                                                <i class="fab fa-linkedin text-primary me-1"></i> LinkedIn
-                                            </label>
-                                        </div>
-                                        <div class="form-check mb-2">
-                                            <input class="form-check-input platform-check" type="checkbox" id="youtube" value="youtube">
-                                            <label class="form-check-label" for="youtube">
-                                                <i class="fab fa-youtube text-danger me-1"></i> YouTube
-                                            </label>
-                                        </div>
-                                        <div class="form-check mb-2">
-                                            <input class="form-check-input platform-check" type="checkbox" id="tiktok" value="tiktok">
-                                            <label class="form-check-label" for="tiktok">
-                                                <i class="fab fa-tiktok me-1"></i> TikTok
-                                            </label>
-                                        </div>
-                                        <div class="form-check mb-2">
-                                            <input class="form-check-input platform-check" type="checkbox" id="whatsapp" value="whatsapp">
-                                            <label class="form-check-label" for="whatsapp">
-                                                <i class="fab fa-whatsapp text-success me-1"></i> WhatsApp
-                                            </label>
-                                        </div>
-                                        <div class="form-check mb-2">
-                                            <input class="form-check-input" type="checkbox" id="selectAll">
-                                            <label class="form-check-label" for="selectAll">
-                                                <strong>Select All Platforms</strong>
-                                            </label>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-                            
-                            <div class="mb-3">
-                                <label for="scheduleTime" class="form-label">Schedule Date & Time</label>
-                                <input type="datetime-local" class="form-control" id="scheduleTime" required>
-                            </div>
-                            
-                            <button type="submit" class="btn btn-primary w-100">
-                                <i class="fas fa-calendar-plus me-2"></i>Schedule Post
-                            </button>
-                        </form>
-                    </div>
-                </div>
-            </div>
-            
-            <div class="col-md-4">
-                <div class="card">
-                    <div class="card-header bg-light">
-                        <h5 class="mb-0">Upcoming Posts</h5>
-                    </div>
-                    <div class="card-body">
-                        <div id="upcomingPosts" class="d-flex justify-content-center align-items-center" style="min-height: 100px;">
-                            <div class="text-center text-muted">
-                                <i class="fas fa-inbox fa-2x mb-2"></i>
-                                <p>No scheduled posts</p>
-                            </div>
-                        </div>
-                    </div>
+    <!-- Authentication Screen (initially visible) -->
+    <div id="authScreen" class="auth-container">
+        <div class="auth-card card">
+            <div class="card-body">
+                <div class="text-center mb-4">
+                    <h2><i class="fas fa-share-alt me-2 text-primary"></i>Social Media Manager</h2>
+                    <p class="text-muted">Schedule your posts across multiple platforms</p>
                 </div>
                 
-                <div class="card mt-4">
-                    <div class="card-header bg-light">
-                        <h5 class="mb-0">Recent Activity</h5>
-                    </div>
-                    <div class="card-body">
-                        <div id="recentActivity" class="d-flex justify-content-center align-items-center" style="min-height: 100px;">
-                            <div class="text-center text-muted">
-                                <i class="fas fa-history fa-2x mb-2"></i>
-                                <p>No recent activity</p>
+                <ul class="nav nav-tabs auth-tabs mb-4" id="authTabs" role="tablist">
+                    <li class="nav-item" role="presentation">
+                        <button class="nav-link active" id="login-tab" data-bs-toggle="tab" data-bs-target="#login" type="button" role="tab">Login</button>
+                    </li>
+                    <li class="nav-item" role="presentation">
+                        <button class="nav-link" id="signup-tab" data-bs-toggle="tab" data-bs-target="#signup" type="button" role="tab">Sign Up</button>
+                    </li>
+                </ul>
+                
+                <div class="tab-content" id="authTabsContent">
+                    <div class="tab-pane fade show active" id="login" role="tabpanel">
+                        <form id="loginForm">
+                            <div class="mb-3">
+                                <label for="loginEmail" class="form-label">Email address</label>
+                                <input type="email" class="form-control" id="loginEmail" required>
                             </div>
-                        </div>
+                            <div class="mb-3">
+                                <label for="loginPassword" class="form-label">Password</label>
+                                <input type="password" class="form-control" id="loginPassword" required>
+                            </div>
+                            <div class="mb-3 form-check">
+                                <input type="checkbox" class="form-check-input" id="rememberMe">
+                                <label class="form-check-label" for="rememberMe">Remember me</label>
+                            </div>
+                            <button type="submit" class="btn btn-primary w-100 mb-3">Login</button>
+                            
+                            <div class="text-center">
+                                <p class="text-muted">Or login with</p>
+                                <div class="d-flex justify-content-center gap-2">
+                                    <div class="social-btn">
+                                        <i class="fab fa-google text-danger"></i>
+                                    </div>
+                                    <div class="social-btn">
+                                        <i class="fab fa-facebook text-primary"></i>
+                                    </div>
+                                    <div class="social-btn">
+                                        <i class="fab fa-twitter text-info"></i>
+                                    </div>
+                                </div>
+                            </div>
+                        </form>
+                    </div>
+                    
+                    <div class="tab-pane fade" id="signup" role="tabpanel">
+                        <form id="signupForm">
+                            <div class="mb-3">
+                                <label for="signupName" class="form-label">Full Name</label>
+                                <input type="text" class="form-control" id="signupName" required>
+                            </div>
+                            <div class="mb-3">
+                                <label for="signupEmail" class="form-label">Email address</label>
+                                <input type="email" class="form-control" id="signupEmail" required>
+                            </div>
+                            <div class="mb-3">
+                                <label for="signupPassword" class="form-label">Password</label>
+                                <input type="password" class="form-control" id="signupPassword" required>
+                            </div>
+                            <div class="mb-3">
+                                <label for="signupConfirmPassword" class="form-label">Confirm Password</label>
+                                <input type="password" class="form-control" id="signupConfirmPassword" required>
+                            </div>
+                            <div class="mb-3 form-check">
+                                <input type="checkbox" class="form-check-input" id="termsAgree" required>
+                                <label class="form-check-label" for="termsAgree">I agree to the Terms & Conditions</label>
+                            </div>
+                            <button type="submit" class="btn btn-primary w-100">Create Account</button>
+                        </form>
                     </div>
                 </div>
             </div>
         </div>
     </div>
 
-    <div class="position-fixed bottom-0 end-0 p-3" style="z-index: 11">
-        <div id="liveToast" class="toast hide" role="alert" aria-live="assertive" aria-atomic="true">
-            <div class="toast-header">
-                <strong class="me-auto">Notification</strong>
-                <button type="button" class="btn-close" data-bs-dismiss="toast" aria-label="Close"></button>
+    <!-- Main Application (initially hidden) -->
+    <div id="mainApp" style="display: none;">
+        <nav class="navbar navbar-dark bg-primary">
+            <div class="container">
+                <span class="navbar-brand mb-0 h1">
+                    <i class="fas fa-share-alt me-2"></i>Social Media Manager
+                </span>
+                <div class="d-flex align-items-center">
+                    <span class="text-light me-3" id="userWelcome">Welcome, User!</span>
+                    <button class="btn btn-outline-light me-2" data-bs-toggle="modal" data-bs-target="#loginModal">
+                        <i class="fas fa-sign-in-alt me-1"></i>Platform Login
+                    </button>
+                    <div class="dropdown">
+                        <button class="btn btn-light dropdown-toggle" type="button" id="userDropdown" data-bs-toggle="dropdown" aria-expanded="false">
+                            <i class="fas fa-user me-1"></i>Account
+                        </button>
+                        <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="userDropdown">
+                            <li><a class="dropdown-item" href="#" data-bs-toggle="modal" data-bs-target="#accountModal"><i class="fas fa-cog me-2"></i>Account Settings</a></li>
+                            <li><hr class="dropdown-divider"></li>
+                            <li><a class="dropdown-item" href="#" id="logoutBtn"><i class="fas fa-sign-out-alt me-2"></i>Logout</a></li>
+                        </ul>
+                    </div>
+                </div>
             </div>
-            <div class="toast-body" id="toastMessage"></div>
+        </nav>
+
+        <div class="container mt-4">
+            <div class="row">
+                <div class="col-md-8">
+                    <div class="card">
+                        <div class="card-header bg-light">
+                            <h5 class="mb-0">Create New Post</h5>
+                        </div>
+                        <div class="card-body">
+                            <form id="postForm">
+                                <input type="hidden" id="editPostId" value="">
+                                <div class="mb-3">
+                                    <label for="content" class="form-label">Post Content</label>
+                                    <textarea class="form-control" id="content" rows="5" placeholder="What would you like to post?" required></textarea>
+                                </div>
+                                
+                                <div class="mb-3">
+                                    <label class="form-label">Media Attachment</label>
+                                    
+                                    <!-- URL Input -->
+                                    <div class="mb-2">
+                                        <input type="text" class="form-control" id="mediaUrl" placeholder="Or enter a media URL (https://...)">
+                                    </div>
+                                    
+                                    <!-- File Upload -->
+                                    <div class="input-group mb-2">
+                                        <input type="file" class="form-control" id="mediaFile" accept="image/*, video/*" multiple>
+                                        <button class="btn btn-outline-secondary" type="button" id="uploadButton">
+                                            <i class="fas fa-upload me-1"></i>Upload
+                                        </button>
+                                    </div>
+                                    
+                                    <!-- Upload Progress Bar -->
+                                    <div class="progress mb-2" id="uploadProgress" style="display: none; height: 20px;">
+                                        <div class="progress-bar progress-bar-striped progress-bar-animated" role="progressbar" style="width: 0%;" id="progressBar">0%</div>
+                                    </div>
+                                    
+                                    <!-- Media Preview Area -->
+                                    <div id="mediaPreview" class="mt-2 border rounded p-2" style="display: none;">
+                                        <p class="mb-1"><strong>Preview:</strong></p>
+                                        <div id="previewContainer"></div>
+                                        <button type="button" class="btn btn-sm btn-danger mt-2" id="removeMedia">
+                                            <i class="fas fa-times me-1"></i>Remove
+                                        </button>
+                                    </div>
+                                    
+                                    <div class="form-text">
+                                        Upload images or videos from your computer, or provide a URL.
+                                    </div>
+                                </div>
+                                
+                                <div class="mb-3">
+                                    <label class="form-label">Select Platforms:</label>
+                                    <div class="row">
+                                        <div class="col-md-6">
+                                            <div class="form-check mb-2">
+                                                <input class="form-check-input platform-check" type="checkbox" id="facebookProfile" value="facebook_profile">
+                                                <label class="form-check-label" for="facebookProfile">
+                                                    <i class="fab fa-facebook text-primary me-1"></i> Facebook Profile
+                                                </label>
+                                            </div>
+                                            <div class="form-check mb-2">
+                                                <input class="form-check-input platform-check" type="checkbox" id="facebookPage" value="facebook_page">
+                                                <label class="form-check-label" for="facebookPage">
+                                                    <i class="fab fa-facebook text-primary me-1"></i> Facebook Page
+                                                </label>
+                                            </div>
+                                            <div class="form-check mb-2">
+                                                <input class="form-check-input platform-check" type="checkbox" id="facebookGroup" value="facebook_group">
+                                                <label class="form-check-label" for="facebookGroup">
+                                                    <i class="fab fa-facebook text-primary me-1"></i> Facebook Group
+                                                </label>
+                                            </div>
+                                            <div class="form-check mb-2">
+                                                <input class="form-check-input platform-check" type="checkbox" id="instagram" value="instagram">
+                                                <label class="form-check-label" for="instagram">
+                                                    <i class="fab fa-instagram text-danger me-1"></i> Instagram
+                                                </label>
+                                            </div>
+                                            <div class="form-check mb-2">
+                                                <input class="form-check-input platform-check" type="checkbox" id="twitter" value="twitter">
+                                                <label class="form-check-label" for="twitter">
+                                                    <i class="fab fa-twitter text-info me-1"></i> Twitter
+                                                </label>
+                                            </div>
+                                        </div>
+                                        <div class="col-md-6">
+                                            <div class="form-check mb-2">
+                                                <input class="form-check-input platform-check" type="checkbox" id="linkedin" value="linkedin">
+                                                <label class="form-check-label" for="linkedin">
+                                                    <i class="fab fa-linkedin text-primary me-1"></i> LinkedIn
+                                                </label>
+                                            </div>
+                                            <div class="form-check mb-2">
+                                                <input class="form-check-input platform-check" type="checkbox" id="youtube" value="youtube">
+                                                <label class="form-check-label" for="youtube">
+                                                    <i class="fab fa-youtube text-danger me-1"></i> YouTube
+                                                </label>
+                                            </div>
+                                            <div class="form-check mb-2">
+                                                <input class="form-check-input platform-check" type="checkbox" id="tiktok" value="tiktok">
+                                                <label class="form-check-label" for="tiktok">
+                                                    <i class="fab fa-tiktok me-1"></i> TikTok
+                                                </label>
+                                            </div>
+                                            <div class="form-check mb-2">
+                                                <input class="form-check-input platform-check" type="checkbox" id="whatsapp" value="whatsapp">
+                                                <label class="form-check-label" for="whatsapp">
+                                                    <i class="fab fa-whatsapp text-success me-1"></i> WhatsApp
+                                                </label>
+                                            </div>
+                                            <div class="form-check mb-2">
+                                                <input class="form-check-input" type="checkbox" id="selectAll">
+                                                <label class="form-check-label" for="selectAll">
+                                                    <strong>Select All Platforms</strong>
+                                                </label>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                                
+                                <div class="mb-3">
+                                    <label for="scheduleTime" class="form-label">Schedule Date & Time</label>
+                                    <input type="datetime-local" class="form-control" id="scheduleTime" required>
+                                </div>
+                                
+                                <div class="d-flex">
+                                    <button type="submit" class="btn btn-primary w-100 me-2" id="submitButton">
+                                        <i class="fas fa-calendar-plus me-2"></i>Schedule Post
+                                    </button>
+                                    <button type="button" class="btn btn-secondary" id="cancelEdit" style="display: none;">
+                                        Cancel Edit
+                                    </button>
+                                </div>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="col-md-4">
+                    <div class="card">
+                        <div class="card-header bg-light d-flex justify-content-between align-items-center">
+                            <h5 class="mb-0">Upcoming Posts</h5>
+                            <button class="btn btn-sm btn-outline-primary" id="refreshPosts">
+                                <i class="fas fa-sync-alt"></i>
+                            </button>
+                        </div>
+                        <div class="card-body">
+                            <div id="upcomingPosts" class="d-flex justify-content-center align-items-center" style="min-height: 100px;">
+                                <div class="text-center text-muted">
+                                    <i class="fas fa-inbox fa-2x mb-2"></i>
+                                    <p>No scheduled posts</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="card mt-4">
+                        <div class="card-header bg-light">
+                            <h5 class="mb-0">Recent Activity</h5>
+                        </div>
+                        <div class="card-body">
+                            <div id="recentActivity" class="d-flex justify-content-center align-items-center" style="min-height: 100px;">
+                                <div class="text-center text-muted">
+                                    <i class="fas fa-history fa-2x mb-2"></i>
+                                    <p>No recent activity</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Login Modal -->
+        <div class="modal fade" id="loginModal" tabindex="-1" aria-labelledby="loginModalLabel" aria-hidden="true">
+            <div class="modal-dialog modal-lg">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h5 class="modal-title" id="loginModalLabel">Connect Social Media Accounts</h5>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                    </div>
+                    <div class="modal-body">
+                        <div class="row">
+                            <div class="col-md-4 mb-3">
+                                <div class="card login-platform" data-platform="facebook">
+                                    <div class="card-body text-center">
+                                        <i class="fab fa-facebook fa-3x text-primary mb-2"></i>
+                                        <h5>Facebook</h5>
+                                        <div class="login-status logged-out" id="facebookStatus"></div>
+                                        <p class="text-muted small">Connect your Facebook profile</p>
+                                        <button class="btn btn-primary btn-sm connect-btn">Connect</button>
+                                        <button class="btn btn-outline-danger btn-sm disconnect-btn" style="display: none;">Disconnect</button>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-md-4 mb-3">
+                                <div class="card login-platform" data-platform="instagram">
+                                    <div class="card-body text-center">
+                                        <i class="fab fa-instagram fa-3x text-danger mb-2"></i>
+                                        <h5>Instagram</h5>
+                                        <div class="login-status logged-out" id="instagramStatus"></div>
+                                        <p class="text-muted small">Connect your Instagram account</p>
+                                        <button class="btn btn-primary btn-sm connect-btn">Connect</button>
+                                        <button class="btn btn-outline-danger btn-sm disconnect-btn" style="display: none;">Disconnect</button>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-md-4 mb-3">
+                                <div class="card login-platform" data-platform="twitter">
+                                    <div class="card-body text-center">
+                                        <i class="fab fa-twitter fa-3x text-info mb-2"></i>
+                                        <h5>Twitter</h5>
+                                        <div class="login-status logged-out" id="twitterStatus"></div>
+                                        <p class="text-muted small">Connect your Twitter account</p>
+                                        <button class="btn btn-primary btn-sm connect-btn">Connect</button>
+                                        <button class="btn btn-outline-danger btn-sm disconnect-btn" style="display: none;">Disconnect</button>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-md-4 mb-3">
+                                <div class="card login-platform" data-platform="linkedin">
+                                    <div class="card-body text-center">
+                                        <i class="fab fa-linkedin fa-3x text-primary mb-2"></i>
+                                        <h5>LinkedIn</h5>
+                                        <div class="login-status logged-out" id="linkedinStatus"></div>
+                                        <p class="text-muted small">Connect your LinkedIn profile</p>
+                                        <button class="btn btn-primary btn-sm connect-btn">Connect</button>
+                                        <button class="btn btn-outline-danger btn-sm disconnect-btn" style="display: none;">Disconnect</button>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-md-4 mb-3">
+                                <div class="card login-platform" data-platform="youtube">
+                                    <div class="card-body text-center">
+                                        <i class="fab fa-youtube fa-3x text-danger mb-2"></i>
+                                        <h5>YouTube</h5>
+                                        <div class="login-status logged-out" id="youtubeStatus"></div>
+                                        <p class="text-muted small">Connect your YouTube channel</p>
+                                        <button class="btn btn-primary btn-sm connect-btn">Connect</button>
+                                        <button class="btn btn-outline-danger btn-sm disconnect-btn" style="display: none;">Disconnect</button>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-md-4 mb-3">
+                                <div class="card login-platform" data-platform="tiktok">
+                                    <div class="card-body text-center">
+                                        <i class="fab fa-tiktok fa-3x text-dark mb-2"></i>
+                                        <h5>TikTok</h5>
+                                        <div class="login-status logged-out" id="tiktokStatus"></div>
+                                        <p class="text-muted small">Connect your TikTok account</p>
+                                        <button class="btn btn-primary btn-sm connect-btn">Connect</button>
+                                        <button class="btn btn-outline-danger btn-sm disconnect-btn" style="display: none;">Disconnect</button>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-md-4 mb-3">
+                                <div class="card login-platform" data-platform="whatsapp">
+                                    <div class="card-body text-center">
+                                        <i class="fab fa-whatsapp fa-3x text-success mb-2"></i>
+                                        <h5>WhatsApp</h5>
+                                        <div class="login-status logged-out" id="whatsappStatus"></div>
+                                        <p class="text-muted small">Connect your WhatsApp Business</p>
+                                        <button class="btn btn-primary btn-sm connect-btn">Connect</button>
+                                        <button class="btn btn-outline-danger btn-sm disconnect-btn" style="display: none;">Disconnect</button>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Account Modal -->
+        <div class="modal fade" id="accountModal" tabindex="-1" aria-labelledby="accountModalLabel" aria-hidden="true">
+            <div class="modal-dialog">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h5 class="modal-title" id="accountModalLabel">Account Settings</h5>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                    </div>
+                    <div class="modal-body">
+                        <div class="d-flex align-items-center mb-4">
+                            <div class="user-avatar" id="userAvatar">
+                                U
+                            </div>
+                            <div class="ms-3">
+                                <h5 class="mb-0" id="userName">User Name</h5>
+                                <p class="text-muted mb-0" id="userEmail">user@example.com</p>
+                            </div>
+                        </div>
+                        
+                        <h6>Connected Accounts</h6>
+                        <ul class="list-group mb-3" id="connectedAccountsList">
+                            <li class="list-group-item d-flex justify-content-between align-items-center">
+                                <span><i class="fab fa-facebook text-primary me-2"></i> Facebook</span>
+                                <span class="badge bg-danger">Not Connected</span>
+                            </li>
+                            <li class="list-group-item d-flex justify-content-between align-items-center">
+                                <span><i class="fab fa-instagram text-danger me-2"></i> Instagram</span>
+                                <span class="badge bg-danger">Not Connected</span>
+                            </li>
+                            <li class="list-group-item d-flex justify-content-between align-items-center">
+                                <span><i class="fab fa-twitter text-info me-2"></i> Twitter</span>
+                                <span class="badge bg-danger">Not Connected</span>
+                            </li>
+                            <li class="list-group-item d-flex justify-content-between align-items-center">
+                                <span><i class="fab fa-youtube text-danger me-2"></i> YouTube</span>
+                                <span class="badge bg-danger">Not Connected</span>
+                            </li>
+                            <li class="list-group-item d-flex justify-content-between align-items-center">
+                                <span><i class="fab fa-tiktok me-2"></i> TikTok</span>
+                                <span class="badge bg-danger">Not Connected</span>
+                            </li>
+                            <li class="list-group-item d-flex justify-content-between align-items-center">
+                                <span><i class="fab fa-whatsapp text-success me-2"></i> WhatsApp</span>
+                                <span class="badge bg-danger">Not Connected</span>
+                            </li>
+                        </ul>
+                        
+                        <div class="d-grid">
+                            <button class="btn btn-outline-primary" data-bs-toggle="modal" data-bs-target="#loginModal">
+                                <i class="fas fa-plus me-1"></i>Connect More Accounts
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="position-fixed bottom-0 end-0 p-3" style="z-index: 11">
+            <div id="liveToast" class="toast hide" role="alert" aria-live="assertive" aria-atomic="true">
+                <div class="toast-header">
+                    <strong class="me-auto">Notification</strong>
+                    <button type="button" class="btn-close" data-bs-dismiss="toast" aria-label="Close"></button>
+                </div>
+                <div class="toast-body" id="toastMessage"></div>
+            </div>
         </div>
     </div>
 
