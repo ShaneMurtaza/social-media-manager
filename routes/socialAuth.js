@@ -58,17 +58,25 @@ router.get('/whatsapp', (req, res) => {
 });
 
 // Route to get connection status
-router.get('/status', (req, res) => {
-  // This would check the database for connected accounts
-  res.json({
-    facebook: false,
-    twitter: false,
-    instagram: false,
-    linkedin: false,
-    youtube: false,
-    tiktok: false,
-    whatsapp: false
-  });
+router.get('/status/:userId', async (req, res) => {
+  try {
+    const userId = req.params.userId;
+    
+    // In a real application, you would query your database
+    // For now, we'll return a simulated response
+    res.json({
+      facebook: false,
+      twitter: false,
+      instagram: false,
+      linkedin: false,
+      youtube: false,
+      tiktok: false,
+      whatsapp: false
+    });
+  } catch (err) {
+    console.error('Error fetching connection status:', err);
+    res.status(500).json({ error: 'Failed to fetch connection status' });
+  }
 });
 
 // Route to disconnect a platform

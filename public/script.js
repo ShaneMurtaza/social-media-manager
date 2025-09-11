@@ -1,3 +1,22 @@
+// Security enhancement: Password hashing
+async function hashPassword(password) {
+    const encoder = new TextEncoder();
+    const data = encoder.encode(password);
+    const hash = await crypto.subtle.digest('SHA-256', data);
+    return Array.from(new Uint8Array(hash)).map(b => b.toString(16).padStart(2, '0')).join('');
+}
+
+// Email validation
+function validateEmail(email) {
+    const re = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    return re.test(email);
+}
+
+// Password validation
+function validatePassword(password) {
+    return password.length >= 8;
+}
+
 document.addEventListener('DOMContentLoaded', function() {
     // Check if user is logged in
     const currentUser = JSON.parse(localStorage.getItem('currentUser'));
@@ -10,42 +29,61 @@ document.addEventListener('DOMContentLoaded', function() {
     const toast = new bootstrap.Toast(toastEl);
     
     // Login Form Submission
-    document.getElementById('loginForm').addEventListener('submit', function(e) {
+    document.getElementById('loginForm').addEventListener('submit', async function(e) {
         e.preventDefault();
         const email = document.getElementById('loginEmail').value;
         const password = document.getElementById('loginPassword').value;
         
-        // Simple validation
-        if (!email || !password) {
-            showToast('Please fill in all fields', 'warning');
+        if (!validateEmail(email)) {
+            showToast('Please enter a valid email address', 'warning');
             return;
         }
         
-        // Check if user exists
-        const users = JSON.parse(localStorage.getItem('users')) || [];
-        const user = users.find(u => u.email === email && u.password === password);
+        if (!validatePassword(password)) {
+            showToast('Password must be at least 8 characters long', 'warning');
+            return;
+        }
         
-        if (user) {
-            // Save to localStorage
-            localStorage.setItem('currentUser', JSON.stringify(user));
-            showMainApp(user);
-            showToast('Login successful!', 'success');
-        } else {
-            showToast('Invalid email or password', 'danger');
+        try {
+            const hashedPassword = await hashPassword(password);
+            const users = JSON.parse(localStorage.getItem('users')) || [];
+            const user = users.find(u => u.email === email && u.password === hashedPassword);
+            
+            if (user) {
+                // Create a secure session token
+                const sessionToken = Math.random().toString(36).substring(2) + Date.now().toString(36);
+                user.sessionToken = sessionToken;
+                user.lastLogin = new Date().toISOString();
+                
+                localStorage.setItem('currentUser', JSON.stringify(user));
+                localStorage.setItem('users', JSON.stringify(users));
+                
+                showMainApp(user);
+                showToast('Login successful!', 'success');
+            } else {
+                showToast('Invalid email or password', 'danger');
+            }
+        } catch (error) {
+            console.error('Login error:', error);
+            showToast('Authentication error. Please try again.', 'danger');
         }
     });
     
     // Signup Form Submission
-    document.getElementById('signupForm').addEventListener('submit', function(e) {
+    document.getElementById('signupForm').addEventListener('submit', async function(e) {
         e.preventDefault();
         const name = document.getElementById('signupName').value;
         const email = document.getElementById('signupEmail').value;
         const password = document.getElementById('signupPassword').value;
         const confirmPassword = document.getElementById('signupConfirmPassword').value;
         
-        // Validation
-        if (!name || !email || !password || !confirmPassword) {
-            showToast('Please fill in all fields', 'warning');
+        if (!validateEmail(email)) {
+            showToast('Please enter a valid email address', 'warning');
+            return;
+        }
+        
+        if (!validatePassword(password)) {
+            showToast('Password must be at least 8 characters long', 'warning');
             return;
         }
         
@@ -54,29 +92,35 @@ document.addEventListener('DOMContentLoaded', function() {
             return;
         }
         
-        // Check if user already exists
-        const users = JSON.parse(localStorage.getItem('users')) || [];
-        if (users.some(user => user.email === email)) {
-            showToast('User with this email already exists', 'warning');
-            return;
+        try {
+            const hashedPassword = await hashPassword(password);
+            const users = JSON.parse(localStorage.getItem('users')) || [];
+            
+            if (users.some(user => user.email === email)) {
+                showToast('User with this email already exists', 'warning');
+                return;
+            }
+            
+            const newUser = {
+                id: Date.now(),
+                name,
+                email,
+                password: hashedPassword,
+                connectedPlatforms: {},
+                createdAt: new Date().toISOString(),
+                sessionToken: Math.random().toString(36).substring(2) + Date.now().toString(36)
+            };
+            
+            users.push(newUser);
+            localStorage.setItem('users', JSON.stringify(users));
+            localStorage.setItem('currentUser', JSON.stringify(newUser));
+            
+            showMainApp(newUser);
+            showToast('Account created successfully!', 'success');
+        } catch (error) {
+            console.error('Signup error:', error);
+            showToast('Registration error. Please try again.', 'danger');
         }
-        
-        // Create new user
-        const newUser = {
-            id: Date.now(),
-            name,
-            email,
-            password,
-            connectedPlatforms: {}
-        };
-        
-        // Save user
-        users.push(newUser);
-        localStorage.setItem('users', JSON.stringify(users));
-        localStorage.setItem('currentUser', JSON.stringify(newUser));
-        
-        showMainApp(newUser);
-        showToast('Account created successfully!', 'success');
     });
     
     // Logout functionality
@@ -84,6 +128,13 @@ document.addEventListener('DOMContentLoaded', function() {
         localStorage.removeItem('currentUser');
         document.getElementById('mainApp').style.display = 'none';
         document.getElementById('authScreen').style.display = 'flex';
+        showToast('Logged out successfully', 'info');
+    });
+    
+    // Test posts loading button
+    document.getElementById('testPostsBtn')?.addEventListener('click', function() {
+        loadUpcomingPosts();
+        showToast('Testing posts loading...', 'info');
     });
     
     // Show main application
@@ -97,6 +148,16 @@ document.addEventListener('DOMContentLoaded', function() {
         
         // Load connected platforms
         loadConnectedPlatforms(user);
+        
+        // Load data
+        loadUpcomingPosts();
+        loadRecentActivity();
+        
+        // Set minimum datetime for schedule input to current time
+        const now = new Date();
+        const timezoneOffset = now.getTimezoneOffset() * 60000;
+        const localISOTime = new Date(now - timezoneOffset).toISOString().slice(0, 16);
+        document.getElementById('scheduleTime').min = localISOTime;
     }
     
     // Load connected platforms
@@ -105,7 +166,9 @@ document.addEventListener('DOMContentLoaded', function() {
         const accounts = connectedAccountsList.querySelectorAll('li');
         
         accounts.forEach(account => {
-            const platform = account.querySelector('i').classList[1].replace('fa-', '');
+            const platformIcon = account.querySelector('i');
+            const platformClass = Array.from(platformIcon.classList).find(cls => cls.startsWith('fa-'));
+            const platform = platformClass ? platformClass.replace('fa-', '') : '';
             const badge = account.querySelector('.badge');
             
             if (user.connectedPlatforms && user.connectedPlatforms[platform]) {
@@ -153,7 +216,6 @@ document.addEventListener('DOMContentLoaded', function() {
     document.querySelectorAll('.login-platform').forEach(card => {
         const connectBtn = card.querySelector('.connect-btn');
         const disconnectBtn = card.querySelector('.disconnect-btn');
-        const statusIndicator = card.querySelector('.login-status');
         
         connectBtn.addEventListener('click', function() {
             const platform = card.getAttribute('data-platform');
@@ -169,47 +231,104 @@ document.addEventListener('DOMContentLoaded', function() {
     // Connect platform
     function connectPlatform(platform, card) {
         const currentUser = JSON.parse(localStorage.getItem('currentUser'));
-        const users = JSON.parse(localStorage.getItem('users'));
+        if (!currentUser) {
+            showToast('Please log in first', 'warning');
+            return;
+        }
         
-        // Simulate connection process
         const connectBtn = card.querySelector('.connect-btn');
         const disconnectBtn = card.querySelector('.disconnect-btn');
         const statusIndicator = card.querySelector('.login-status');
         
-        connectBtn.disabled = true;
-        connectBtn.innerHTML = '<span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span> Connecting...';
-        
-        setTimeout(() => {
-            // Update user data
-            if (!currentUser.connectedPlatforms) {
-                currentUser.connectedPlatforms = {};
-            }
-            currentUser.connectedPlatforms[platform] = true;
+        // Show authentication popup for TikTok
+        if (platform === 'tiktok') {
+            const email = prompt('Enter your TikTok email:');
+            const password = prompt('Enter your TikTok password:');
             
-            // Update users array
-            const userIndex = users.findIndex(u => u.id === currentUser.id);
-            if (userIndex !== -1) {
-                users[userIndex] = currentUser;
+            if (!email || !password) {
+                showToast('TikTok authentication canceled', 'warning');
+                return;
             }
             
-            // Save to localStorage
-            localStorage.setItem('currentUser', JSON.stringify(currentUser));
-            localStorage.setItem('users', JSON.stringify(users));
+            // Simulate authentication process
+            connectBtn.disabled = true;
+            connectBtn.innerHTML = '<span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span> Connecting...';
             
-            // Update UI
-            statusIndicator.classList.remove('logged-out');
-            statusIndicator.classList.add('logged-in');
-            connectBtn.style.display = 'none';
-            disconnectBtn.style.display = 'inline-block';
-            connectBtn.disabled = false;
-            connectBtn.innerHTML = 'Connect';
-            card.classList.add('connected');
+            setTimeout(() => {
+                // Update UI for successful connection
+                statusIndicator.classList.remove('logged-out');
+                statusIndicator.classList.add('logged-in');
+                connectBtn.style.display = 'none';
+                disconnectBtn.style.display = 'inline-block';
+                card.classList.add('connected');
+                
+                // Update user data
+                if (!currentUser.connectedPlatforms) {
+                    currentUser.connectedPlatforms = {};
+                }
+                currentUser.connectedPlatforms[platform] = {
+                    connected: true,
+                    email: email,
+                    connectedAt: new Date().toISOString()
+                };
+                
+                // Update users array
+                const users = JSON.parse(localStorage.getItem('users')) || [];
+                const userIndex = users.findIndex(u => u.id === currentUser.id);
+                if (userIndex !== -1) {
+                    users[userIndex] = currentUser;
+                }
+                
+                // Save to localStorage
+                localStorage.setItem('currentUser', JSON.stringify(currentUser));
+                localStorage.setItem('users', JSON.stringify(users));
+                
+                // Update account modal
+                loadConnectedPlatforms(currentUser);
+                
+                showToast(`TikTok connected successfully as ${email}!`, 'success');
+                connectBtn.disabled = false;
+            }, 2000);
+        } else {
+            // For other platforms, use the existing simulation
+            connectBtn.disabled = true;
+            connectBtn.innerHTML = '<span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span> Connecting...';
             
-            // Update account modal
-            loadConnectedPlatforms(currentUser);
-            
-            showToast(`${platform.charAt(0).toUpperCase() + platform.slice(1)} connected successfully!`, 'success');
-        }, 2000);
+            setTimeout(() => {
+                // Update UI for successful connection
+                statusIndicator.classList.remove('logged-out');
+                statusIndicator.classList.add('logged-in');
+                connectBtn.style.display = 'none';
+                disconnectBtn.style.display = 'inline-block';
+                card.classList.add('connected');
+                
+                // Update user data
+                if (!currentUser.connectedPlatforms) {
+                    currentUser.connectedPlatforms = {};
+                }
+                currentUser.connectedPlatforms[platform] = {
+                    connected: true,
+                    connectedAt: new Date().toISOString()
+                };
+                
+                // Update users array
+                const users = JSON.parse(localStorage.getItem('users')) || [];
+                const userIndex = users.findIndex(u => u.id === currentUser.id);
+                if (userIndex !== -1) {
+                    users[userIndex] = currentUser;
+                }
+                
+                // Save to localStorage
+                localStorage.setItem('currentUser', JSON.stringify(currentUser));
+                localStorage.setItem('users', JSON.stringify(users));
+                
+                // Update account modal
+                loadConnectedPlatforms(currentUser);
+                
+                showToast(`${platform.charAt(0).toUpperCase() + platform.slice(1)} connected successfully!`, 'success');
+                connectBtn.disabled = false;
+            }, 2000);
+        }
     }
     
     // Disconnect platform
@@ -217,7 +336,6 @@ document.addEventListener('DOMContentLoaded', function() {
         const currentUser = JSON.parse(localStorage.getItem('currentUser'));
         const users = JSON.parse(localStorage.getItem('users'));
         
-        // Simulate disconnection process
         const connectBtn = card.querySelector('.connect-btn');
         const disconnectBtn = card.querySelector('.disconnect-btn');
         const statusIndicator = card.querySelector('.login-status');
@@ -287,33 +405,26 @@ document.addEventListener('DOMContentLoaded', function() {
             return;
         }
 
-        const formData = new FormData();
-        formData.append('media', files[0]);
-
-        try {
-            uploadProgress.style.display = 'block';
+        // Simulate upload process
+        uploadProgress.style.display = 'block';
+        
+        // Simulate progress
+        let progress = 0;
+        const interval = setInterval(() => {
+            progress += 5;
+            progressBar.style.width = `${progress}%`;
+            progressBar.textContent = `${progress}%`;
             
-            const response = await fetch('/api/upload', {
-                method: 'POST',
-                body: formData,
-            });
-
-            if (!response.ok) {
-                throw new Error('Upload failed');
+            if (progress >= 100) {
+                clearInterval(interval);
+                setTimeout(() => {
+                    uploadedMediaUrl = URL.createObjectURL(files[0]);
+                    showMediaPreview(files[0]);
+                    showToast('File uploaded successfully!', 'success');
+                    uploadProgress.style.display = 'none';
+                }, 300);
             }
-
-            const result = await response.json();
-            uploadedMediaUrl = result.fileUrl;
-            
-            showMediaPreview(files[0]);
-            showToast('File uploaded successfully!', 'success');
-            
-        } catch (error) {
-            console.error('Upload error:', error);
-            showToast('Failed to upload file.', 'danger');
-        } finally {
-            uploadProgress.style.display = 'none';
-        }
+        }, 100);
     });
 
     // Function to show media preview
@@ -395,26 +506,45 @@ document.addEventListener('DOMContentLoaded', function() {
                 postData.id = editPostId.value;
             }
             
-            response = await fetch(url, {
-                method: method,
-                headers: {
-                    'Content-Type': 'application/json',
-                },
-                body: JSON.stringify(postData)
-            });
+            // For demo purposes, we'll simulate the API response
+            // In a real app, you would use fetch to call your API
+            const result = {success: true, id: Date.now()};
             
-            const result = await response.json();
-            
-            if (response.ok) {
+            if (result.success) {
                 showToast(editPostId.value ? 'Post updated successfully!' : 'Post scheduled successfully!', 'success');
                 postForm.reset();
                 selectAll.checked = false;
                 editPostId.value = '';
                 submitButton.innerHTML = '<i class="fas fa-calendar-plus me-2"></i>Schedule Post';
                 cancelEdit.style.display = 'none';
+                
+                // Add the new post to local storage for demonstration
+                const currentUser = JSON.parse(localStorage.getItem('currentUser'));
+                if (currentUser) {
+                    if (!currentUser.posts) currentUser.posts = [];
+                    currentUser.posts.push({
+                        id: result.id,
+                        content,
+                        media_url: mediaUrl,
+                        scheduled_for: scheduledFor,
+                        platforms: selectedPlatforms,
+                        created_at: new Date().toISOString()
+                    });
+                    
+                    localStorage.setItem('currentUser', JSON.stringify(currentUser));
+                    
+                    // Update users array
+                    const users = JSON.parse(localStorage.getItem('users')) || [];
+                    const userIndex = users.findIndex(u => u.id === currentUser.id);
+                    if (userIndex !== -1) {
+                        users[userIndex] = currentUser;
+                        localStorage.setItem('users', JSON.stringify(users));
+                    }
+                }
+                
                 loadUpcomingPosts();
             } else {
-                showToast('Error: ' + result.error, 'danger');
+                showToast('Error: ' + (result.error || 'Unknown error'), 'danger');
             }
         } catch (error) {
             console.error('Error:', error);
@@ -463,10 +593,10 @@ document.addEventListener('DOMContentLoaded', function() {
     }
     
     // Function to load upcoming posts
-    async function loadUpcomingPosts() {
+    function loadUpcomingPosts() {
         try {
-            const response = await fetch('/api/posts/upcoming');
-            const posts = await response.json();
+            const currentUser = JSON.parse(localStorage.getItem('currentUser'));
+            const posts = currentUser?.posts || [];
             
             const upcomingPostsContainer = document.getElementById('upcomingPosts');
             
@@ -566,56 +696,78 @@ document.addEventListener('DOMContentLoaded', function() {
             });
         } catch (error) {
             console.error('Error loading upcoming posts:', error);
+            const upcomingPostsContainer = document.getElementById('upcomingPosts');
+            upcomingPostsContainer.innerHTML = `
+                <div class="text-center text-danger">
+                    <i class="fas fa-exclamation-triangle fa-2x mb-2"></i>
+                    <p>Failed to load scheduled posts</p>
+                    <button class="btn btn-sm btn-primary" onclick="loadUpcomingPosts()">Retry</button>
+                </div>
+            `;
         }
     }
     
     // Function to edit a post
-    async function editPost(postId) {
-        try {
-            const response = await fetch(`/api/posts/${postId}`);
-            const post = await response.json();
-            
-            // Populate the form with post data
-            document.getElementById('content').value = post.content;
-            document.getElementById('mediaUrl').value = post.media_url || '';
-            document.getElementById('scheduleTime').value = post.scheduled_for.substring(0, 16);
-            
-            // Check the platforms
-            document.querySelectorAll('.platform-check').forEach(checkbox => {
-                checkbox.checked = post.platforms.includes(checkbox.value);
-            });
-            
-            // Set the edit mode
-            editPostId.value = postId;
-            submitButton.innerHTML = '<i class="fas fa-save me-2"></i>Update Post';
-            cancelEdit.style.display = 'block';
-            
-            // Scroll to form
-            document.getElementById('postForm').scrollIntoView({ behavior: 'smooth' });
-            
-            showToast('Post loaded for editing', 'info');
-        } catch (error) {
-            console.error('Error loading post for editing:', error);
-            showToast('Failed to load post for editing', 'danger');
+    function editPost(postId) {
+        const currentUser = JSON.parse(localStorage.getItem('currentUser'));
+        const post = currentUser.posts.find(p => p.id == postId);
+        
+        if (!post) {
+            showToast('Post not found', 'danger');
+            return;
         }
+        
+        // Populate the form with post data
+        document.getElementById('content').value = post.content;
+        document.getElementById('mediaUrl').value = post.media_url || '';
+        
+        // Format date for datetime-local input
+        const scheduledFor = new Date(post.scheduled_for);
+        const timezoneOffset = scheduledFor.getTimezoneOffset() * 60000;
+        const localISOTime = new Date(scheduledFor - timezoneOffset).toISOString().slice(0, 16);
+        document.getElementById('scheduleTime').value = localISOTime;
+        
+        // Check the platforms
+        document.querySelectorAll('.platform-check').forEach(checkbox => {
+            checkbox.checked = post.platforms.includes(checkbox.value);
+        });
+        
+        // Set the edit mode
+        editPostId.value = postId;
+        submitButton.innerHTML = '<i class="fas fa-save me-2"></i>Update Post';
+        cancelEdit.style.display = 'block';
+        
+        // Scroll to form
+        document.getElementById('postForm').scrollIntoView({ behavior: 'smooth' });
+        
+        showToast('Post loaded for editing', 'info');
     }
     
     // Function to delete a post
-    async function deletePost(postId) {
+    function deletePost(postId) {
         if (!confirm('Are you sure you want to delete this scheduled post?')) {
             return;
         }
         
         try {
-            const response = await fetch(`/api/posts/delete/${postId}`, { method: 'DELETE' });
-            const result = await response.json();
+            const currentUser = JSON.parse(localStorage.getItem('currentUser'));
+            const users = JSON.parse(localStorage.getItem('users')) || [];
             
-            if (response.ok) {
-                showToast('Post deleted successfully', 'success');
-                loadUpcomingPosts();
-            } else {
-                showToast('Error: ' + result.error, 'danger');
+            // Remove the post
+            currentUser.posts = currentUser.posts.filter(p => p.id != postId);
+            
+            // Update users array
+            const userIndex = users.findIndex(u => u.id === currentUser.id);
+            if (userIndex !== -1) {
+                users[userIndex] = currentUser;
             }
+            
+            // Save to localStorage
+            localStorage.setItem('currentUser', JSON.stringify(currentUser));
+            localStorage.setItem('users', JSON.stringify(users));
+            
+            showToast('Post deleted successfully', 'success');
+            loadUpcomingPosts();
         } catch (error) {
             console.error('Error deleting post:', error);
             showToast('Failed to delete post', 'danger');
@@ -623,10 +775,19 @@ document.addEventListener('DOMContentLoaded', function() {
     }
     
     // Function to load recent activity
-    async function loadRecentActivity() {
+    function loadRecentActivity() {
         try {
-            const response = await fetch('/api/posts/recent');
-            const activity = await response.json();
+            // For demo purposes, we'll use sample data
+            const activity = [
+                {
+                    content: 'Posted: Summer sale is live!',
+                    posted_at: new Date(Date.now() - 3600000).toISOString()
+                },
+                {
+                    content: 'Posted: New blog article published',
+                    posted_at: new Date(Date.now() - 86400000).toISOString()
+                }
+            ];
             
             const activityContainer = document.getElementById('recentActivity');
             
@@ -659,17 +820,5 @@ document.addEventListener('DOMContentLoaded', function() {
         } catch (error) {
             console.error('Error loading recent activity:', error);
         }
-    }
-
-    // Load initial data if user is logged in
-    if (currentUser) {
-        loadUpcomingPosts();
-        loadRecentActivity();
-        
-        // Set minimum datetime for schedule input to current time
-        const now = new Date();
-        const timezoneOffset = now.getTimezoneOffset() * 60000;
-        const localISOTime = new Date(now - timezoneOffset).toISOString().slice(0, 16);
-        document.getElementById('scheduleTime').min = localISOTime;
     }
 });

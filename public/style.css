@@ -267,3 +267,120 @@ textarea {
     border-color: #28a745;
     box-shadow: 0 0 10px rgba(40, 167, 69, 0.2);
 }
+
+/* Add these styles to your existing style.css file */
+
+.post-item {
+    border-left: 4px solid #0d6efd;
+    transition: all 0.2s;
+}
+
+.post-item:hover {
+    background-color: #f8f9fa;
+}
+
+.platform-badge {
+    font-size: 0.7rem;
+    margin-right: 3px;
+}
+
+.login-platform {
+    cursor: pointer;
+    transition: all 0.2s;
+}
+
+.login-platform:hover {
+    transform: scale(1.05);
+}
+
+.login-status {
+    width: 10px;
+    height: 10px;
+    border-radius: 50%;
+    display: inline-block;
+    margin-left: 5px;
+}
+
+.logged-in {
+    background-color: #28a745;
+}
+
+.logged-out {
+    background-color: #dc3545;
+}
+
+.post-actions {
+    opacity: 0.5;
+    transition: all 0.2s;
+}
+
+.post-item:hover .post-actions {
+    opacity: 1;
+}
+
+.modal-content {
+    border-radius: 10px;
+}
+
+.auth-container {
+    display: flex;
+    min-height: 100vh;
+    align-items: center;
+    justify-content: center;
+    background: linear-gradient(135deg, #6e8efb, #a777e3);
+}
+
+.auth-card {
+    width: 100%;
+    max-width: 400px;
+    border-radius: 12px;
+}
+
+.auth-tabs .nav-link {
+    border: none;
+    padding: 12px;
+    font-weight: 600;
+    color: #6c757d;
+}
+
+.auth-tabs .nav-link.active {
+    color: #0d6efd;
+    border-bottom: 3px solid #0d6efd;
+}
+
+.social-btn {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 10px;
+    border: 1px solid #dee2e6;
+    border-radius: 6px;
+    margin-bottom: 10px;
+    cursor: pointer;
+    transition: all 0.2s;
+}
+
+.social-btn:hover {
+    background-color: #f8f9fa;
+}
+
+.user-avatar {
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    background-color: #0d6efd;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: white;
+    font-weight: bold;
+}
+
+.platform-card {
+    transition: all 0.3s;
+}
+
+.platform-card.connected {
+    border-color: #28a745;
+    box-shadow: 0 0 10px rgba(40, 167, 69, 0.2);
+}
