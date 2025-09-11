@@ -1,5 +1,5 @@
-const { Pool } = require('pg');
-require('dotenv').config();
+import pg from 'pg';
+const { Pool } = pg;
 
 const pool = new Pool({
   connectionString: process.env.DATABASE_URL,
@@ -17,8 +17,12 @@ pool.on('error', (err) => {
   // Implement retry logic here if needed
 });
 
-module.exports = {
-  query: (text, params) => pool.query(text, params),
-  connect: (callback) => pool.connect(callback),
-  end: () => pool.end()
+export const query = (text, params) => pool.query(text, params);
+export const connect = (callback) => pool.connect(callback);
+export const end = () => pool.end();
+
+export default {
+  query,
+  connect,
+  end
 };

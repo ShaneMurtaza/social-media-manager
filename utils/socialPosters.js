@@ -14,7 +14,7 @@ async function postToTwitter(content, mediaUrl = null) {
 
 // Add more functions for other platforms
 
-module.exports = {
+export {
     postToFacebook,
     postToInstagram,
     postToTwitter

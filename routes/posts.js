@@ -1,6 +1,7 @@
-const express = require('express');
-const { query } = require('../db');
-const { withRetry } = require('../utils/databaseRetry');
+import express from 'express';
+import { query } from '../db.js';
+import { withRetry } from '../utils/databaseRetry.js';
+
 const router = express.Router();
 
 // Route to schedule a post with enhanced error handling
@@ -63,4 +64,4 @@ router.get('/recent', async (req, res) => {
   }
 });
 
-module.exports = router;
+export default router;

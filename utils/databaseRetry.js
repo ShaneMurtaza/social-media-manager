@@ -1,5 +1,4 @@
-// utils/databaseRetry.js
-const { query } = require('../db');
+import { query } from '../db.js';
 
 async function withRetry(operation, maxRetries = 3, delay = 1000) {
   for (let i = 0; i < maxRetries; i++) {
@@ -18,4 +17,4 @@ async function withRetry(operation, maxRetries = 3, delay = 1000) {
   throw new Error(`Failed after ${maxRetries} retries`);
 }
 
-module.exports = { withRetry };
+export { withRetry };
