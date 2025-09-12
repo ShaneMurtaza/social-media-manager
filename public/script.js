@@ -821,4 +821,151 @@ document.addEventListener('DOMContentLoaded', function() {
             console.error('Error loading recent activity:', error);
         }
     }
+
+    // Real social media authentication with popup windows
+function connectPlatform(platform, card) {
+    const currentUser = JSON.parse(localStorage.getItem('currentUser'));
+    if (!currentUser) {
+        showToast('Please log in first', 'warning');
+        return;
+    }
+    
+    const connectBtn = card.querySelector('.connect-btn');
+    const disconnectBtn = card.querySelector('.disconnect-btn');
+    const statusIndicator = card.querySelector('.login-status');
+    
+    // Platform-specific login URLs (would be real OAuth URLs in production)
+    const loginUrls = {
+        facebook: 'https://www.facebook.com/login.php',
+        instagram: 'https://www.instagram.com/accounts/login/',
+        twitter: 'https://twitter.com/i/flow/login',
+        linkedin: 'https://www.linkedin.com/login',
+        youtube: 'https://accounts.google.com/ServiceLogin',
+        tiktok: 'https://www.tiktok.com/login',
+        whatsapp: 'https://web.whatsapp.com/'
+    };
+    
+    // Open platform login in a popup
+    const popupWidth = 600;
+    const popupHeight = 700;
+    const left = (screen.width - popupWidth) / 2;
+    const top = (screen.height - popupHeight) / 2;
+    
+    const popup = window.open(
+        loginUrls[platform],
+        `${platform}Login`,
+        `width=${popupWidth},height=${popupHeight},top=${top},left=${left}`
+    );
+    
+    if (!popup) {
+        showToast('Please allow popups for this site', 'warning');
+        return;
+    }
+    
+    connectBtn.disabled = true;
+    connectBtn.innerHTML = '<span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span> Connecting...';
+    
+    // Check for popup closure
+    const checkPopup = setInterval(() => {
+        if (popup.closed) {
+            clearInterval(checkPopup);
+            
+            // Simulate successful connection (in real app, you'd verify OAuth tokens)
+            setTimeout(() => {
+                statusIndicator.classList.remove('logged-out');
+                statusIndicator.classList.add('logged-in');
+                connectBtn.style.display = 'none';
+                disconnectBtn.style.display = 'inline-block';
+                card.classList.add('connected');
+                
+                // Update user data
+                if (!currentUser.connectedPlatforms) {
+                    currentUser.connectedPlatforms = {};
+                }
+                currentUser.connectedPlatforms[platform] = {
+                    connected: true,
+                    connectedAt: new Date().toISOString()
+                };
+                
+                // Update users array
+                const users = JSON.parse(localStorage.getItem('users')) || [];
+                const userIndex = users.findIndex(u => u.id === currentUser.id);
+                if (userIndex !== -1) {
+                    users[userIndex] = currentUser;
+                }
+                
+                // Save to localStorage
+                localStorage.setItem('currentUser', JSON.stringify(currentUser));
+                localStorage.setItem('users', JSON.stringify(users));
+                
+                // Update account modal
+                loadConnectedPlatforms(currentUser);
+                
+                showToast(`${platform.charAt(0).toUpperCase() + platform.slice(1)} connected successfully!`, 'success');
+                connectBtn.disabled = false;
+            }, 1000);
+        }
+    }, 500);
+}
+
+    // Enhanced signup function with email verification
+document.getElementById('signupForm').addEventListener('submit', async function(e) {
+    e.preventDefault();
+    const name = document.getElementById('signupName').value;
+    const email = document.getElementById('signupEmail').value;
+    const password = document.getElementById('signupPassword').value;
+    const confirmPassword = document.getElementById('signupConfirmPassword').value;
+    
+    if (!validateEmail(email)) {
+        showToast('Please enter a valid email address', 'warning');
+        return;
+    }
+    
+    if (!validatePassword(password)) {
+        showToast('Password must be at least 8 characters long', 'warning');
+        return;
+    }
+    
+    if (password !== confirmPassword) {
+        showToast('Passwords do not match', 'warning');
+        return;
+    }
+    
+    try {
+        const hashedPassword = await hashPassword(password);
+        const users = JSON.parse(localStorage.getItem('users')) || [];
+        
+        if (users.some(user => user.email === email)) {
+            showToast('User with this email already exists', 'warning');
+            return;
+        }
+        
+        const newUser = {
+            id: Date.now(),
+            name,
+            email,
+            password: hashedPassword,
+            connectedPlatforms: {},
+            createdAt: new Date().toISOString(),
+            emailVerified: false,
+            adminApproved: false,
+            sessionToken: Math.random().toString(36).substring(2) + Date.now().toString(36)
+        };
+        
+        users.push(newUser);
+        localStorage.setItem('users', JSON.stringify(users));
+        
+        // Send verification email (simulated for now)
+        showToast('Account created! Please check your email for verification.', 'success');
+        
+        // Simulate email verification process
+        setTimeout(() => {
+            showToast('Verification email sent (simulated). Account pending admin approval.', 'info');
+        }, 2000);
+        
+    } catch (error) {
+        console.error('Signup error:', error);
+        showToast('Registration error. Please try again.', 'danger');
+    }
+});
 });

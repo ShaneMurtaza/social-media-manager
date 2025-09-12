@@ -15,7 +15,9 @@ app.use(express.static(path.join(process.cwd(), 'public')));
 import postsRouter from './routes/posts.js';
 import socialAuthRouter from './routes/socialAuth.js';
 import uploadRouter from './routes/upload.js';
+import authRouter from './routes/auth.js';
 
+app.use('/api/auth', authRouter);
 app.use('/api/posts', postsRouter);
 app.use('/api/auth', socialAuthRouter);
 app.use('/api/upload', uploadRouter);
