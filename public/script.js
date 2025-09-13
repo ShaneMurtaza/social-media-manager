@@ -70,58 +70,61 @@ document.addEventListener('DOMContentLoaded', function() {
     });
     
     // Signup Form Submission
-    document.getElementById('signupForm').addEventListener('submit', async function(e) {
-        e.preventDefault();
-        const name = document.getElementById('signupName').value;
-        const email = document.getElementById('signupEmail').value;
-        const password = document.getElementById('signupPassword').value;
-        const confirmPassword = document.getElementById('signupConfirmPassword').value;
-        
-        if (!validateEmail(email)) {
-            showToast('Please enter a valid email address', 'warning');
-            return;
+document.getElementById('signupForm').addEventListener('submit', async function(e) {
+    e.preventDefault();
+    
+    // Get the form data
+    const formData = {
+        name: document.getElementById('signupName').value,
+        email: document.getElementById('signupEmail').value,
+        password: document.getElementById('signupPassword').value
+    };
+
+    // Basic validation: check if passwords match
+    const confirmPassword = document.getElementById('signupConfirmPassword').value;
+    if (formData.password !== confirmPassword) {
+        alert('Passwords do not match!');
+        return;
+    }
+
+    try {
+        // Show a loading state (optional)
+        const submitButton = this.querySelector('button[type="submit"]');
+        const originalText = submitButton.innerHTML;
+        submitButton.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Creating Account...';
+        submitButton.disabled = true;
+
+        // Send the data to our new API endpoint
+        const response = await fetch('/api/auth/register', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify(formData)
+        });
+
+        const result = await response.json();
+
+        if (response.ok) {
+            // Registration was successful!
+            alert(result.message || 'Registration successful! Please check your email to verify your account.');
+            document.getElementById('signupForm').reset(); // Clear the form
+            // Switch back to the login tab
+            document.getElementById('login-tab').click();
+        } else {
+            // There was an error
+            alert('Error: ' + (result.error || 'Failed to create account'));
         }
-        
-        if (!validatePassword(password)) {
-            showToast('Password must be at least 8 characters long', 'warning');
-            return;
-        }
-        
-        if (password !== confirmPassword) {
-            showToast('Passwords do not match', 'warning');
-            return;
-        }
-        
-        try {
-            const hashedPassword = await hashPassword(password);
-            const users = JSON.parse(localStorage.getItem('users')) || [];
-            
-            if (users.some(user => user.email === email)) {
-                showToast('User with this email already exists', 'warning');
-                return;
-            }
-            
-            const newUser = {
-                id: Date.now(),
-                name,
-                email,
-                password: hashedPassword,
-                connectedPlatforms: {},
-                createdAt: new Date().toISOString(),
-                sessionToken: Math.random().toString(36).substring(2) + Date.now().toString(36)
-            };
-            
-            users.push(newUser);
-            localStorage.setItem('users', JSON.stringify(users));
-            localStorage.setItem('currentUser', JSON.stringify(newUser));
-            
-            showMainApp(newUser);
-            showToast('Account created successfully!', 'success');
-        } catch (error) {
-            console.error('Signup error:', error);
-            showToast('Registration error. Please try again.', 'danger');
-        }
-    });
+    } catch (error) {
+        console.error('Error:', error);
+        alert('An error occurred. Please try again.');
+    } finally {
+        // Reset the button state
+        const submitButton = this.querySelector('button[type="submit"]');
+        submitButton.innerHTML = 'Create Account';
+        submitButton.disabled = false;
+    }
+});
     
     // Logout functionality
     document.getElementById('logoutBtn').addEventListener('click', function() {
