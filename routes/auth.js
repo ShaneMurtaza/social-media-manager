@@ -93,7 +93,7 @@ router.get('/verify-email', async (req, res) => {
 
 // User Registration Endpoint
 router.post('/register', async (req, res) => {
-    const { name, email, password } = req.body;
+    const { name, email, password_hash } = req.body;
 
     // 1. Check if user already exists
     try {
@@ -107,9 +107,9 @@ router.post('/register', async (req, res) => {
 
         // 3. Save the new user to the database
         const newUser = await query(
-            'INSERT INTO users (name, email, password) VALUES ($1, $2, $3) RETURNING id',
-            [name, email, hashedPassword]
-        );
+    'INSERT INTO users (name, email, password_hash) VALUES ($1, $2, $3) RETURNING id',
+    [name, email, hashedPassword]
+);
 
         const userId = newUser.rows[0].id;
 
