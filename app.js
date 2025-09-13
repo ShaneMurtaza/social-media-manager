@@ -16,7 +16,9 @@ import postsRouter from './routes/posts.js';
 import socialAuthRouter from './routes/socialAuth.js';
 import uploadRouter from './routes/upload.js';
 import authRouter from './routes/auth.js';
+import adminRouter from './routes/admin.js';
 
+app.use('/api/admin', adminRouter);
 app.use('/api/auth', authRouter);
 app.use('/api/posts', postsRouter);
 app.use('/api/auth', socialAuthRouter);

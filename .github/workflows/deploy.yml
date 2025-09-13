@@ -1,0 +1,39 @@
+name: Deploy to Vercel with Database Migrations
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    env:
+      DATABASE_URL: ${{ secrets.DATABASE_URL }}
+      ADMIN_USER_ID: ${{ secrets.ADMIN_USER_ID }}
+    
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+    
+    - name: Setup Node.js
+      uses: actions/setup-node@v4
+      with:
+        node-version: '18'
+        cache: 'npm'
+    
+    - name: Install dependencies
+      run: npm install
+    
+    - name: Run database migrations
+      run: npm run migrate
+      env:
+        DATABASE_URL: ${{ secrets.DATABASE_URL }}
+        ADMIN_USER_ID: ${{ secrets.ADMIN_USER_ID }}
+    
+    - name: Deploy to Vercel
+      uses: amondnet/vercel-action@v20
+      with:
+        vercel-token: ${{ secrets.VERCEL_TOKEN }}
+        github-token: ${{ secrets.GITHUB_TOKEN }}
+        vercel-args: '--prod'

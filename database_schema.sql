@@ -70,3 +70,43 @@ ADD COLUMN IF NOT EXISTS verification_sent_at TIMESTAMP;
 INSERT INTO users (name, email, password, admin_approved, email_verified, created_at) 
 VALUES ('Admin User', 'admin@example.com', 'hashed_password_here', TRUE, TRUE, NOW())
 ON CONFLICT (email) DO NOTHING;
+
+-- Roles table
+CREATE TABLE IF NOT EXISTS roles (
+    id SERIAL PRIMARY KEY,
+    name VARCHAR(50) UNIQUE NOT NULL,
+    permissions JSONB NOT NULL,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
+
+-- User roles junction table
+CREATE TABLE IF NOT EXISTS user_roles (
+    user_id INTEGER REFERENCES users(id) ON DELETE CASCADE,
+    role_id INTEGER REFERENCES roles(id) ON DELETE CASCADE,
+    assigned_by INTEGER REFERENCES users(id),
+    assigned_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    PRIMARY KEY (user_id, role_id)
+);
+
+-- Admin audit log table
+CREATE TABLE IF NOT EXISTS admin_audit_log (
+    id SERIAL PRIMARY KEY,
+    admin_id INTEGER REFERENCES users(id),
+    action VARCHAR(100) NOT NULL,
+    target_user_id INTEGER REFERENCES users(id),
+    details TEXT,
+    ip_address VARCHAR(45),
+    user_agent TEXT,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
+
+-- Insert default roles
+INSERT INTO roles (name, permissions) VALUES 
+('super_admin', '{"users": ["create", "read", "update", "delete", "assign_roles"], "posts": ["create", "read", "update", "delete", "approve"], "settings": ["read", "update"]}'),
+('admin', '{"users": ["read", "update"], "posts": ["create", "read", "update", "delete", "approve"], "settings": ["read"]}'),
+('moderator', '{"users": ["read"], "posts": ["read", "update", "approve"]}'),
+('user', '{"posts": ["create", "read", "update", "delete"]}')
+ON CONFLICT (name) DO NOTHING;
+
+-- Add role_id to users table for quick access to primary role
+ALTER TABLE users ADD COLUMN IF NOT EXISTS primary_role_id INTEGER REFERENCES roles(id);

@@ -1,3 +1,6 @@
+// Add these lines at the TOP of routes/auth.js
+const { Resend } = require('resend');
+const resend = new Resend(process.env.RESEND_API_KEY);
 import express from 'express';
 import { query } from '../db.js';
 import crypto from 'crypto';
