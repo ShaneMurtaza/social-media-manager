@@ -93,21 +93,16 @@ router.get('/verify-email', async (req, res) => {
 
 // User Registration Endpoint
 router.post('/register', async (req, res) => {
-    // FIX 1: Destructure 'password' from req.body, not 'password_hash'
-    const { name, email, password } = req.body; // Changed from password_hash to password
+    const { name, email, password } = req.body; // Correctly destructuring 'password'
 
-    // 1. Check if user already exists
     try {
         const userCheck = await query('SELECT id FROM users WHERE email = $1', [email]);
         if (userCheck.rows.length > 0) {
             return res.status(400).json({ error: 'User already exists with this email' });
         }
 
-        // 2. Hash the password with a salt round of 10
-        const hashedPassword = await bcrypt.hash(password, 10); // Now using 'password'
+        const hashedPassword = await bcrypt.hash(password, 10);
 
-        // 3. Save the new user to the database
-        // FIX 2: Ensure your 'users' table has the exact columns you're inserting into.
         const newUser = await query(
             'INSERT INTO users (name, email, password_hash) VALUES ($1, $2, $3) RETURNING id',
             [name, email, hashedPassword]
@@ -115,18 +110,14 @@ router.post('/register', async (req, res) => {
 
         const userId = newUser.rows[0].id;
 
-        // 4. Generate verification token
         const token = crypto.randomBytes(32).toString('hex');
-        const expiresAt = new Date(Date.now() + 24 * 60 * 60 * 1000); // 24 hours
+        const expiresAt = new Date(Date.now() + 24 * 60 * 60 * 1000);
 
-        // Save verification token
-        // FIX 3: Ensure the 'email_verifications' table exists with columns user_id, token, expires_at
         await query(
             'INSERT INTO email_verifications (user_id, token, expires_at) VALUES ($1, $2, $3)',
             [userId, token, expiresAt]
         );
 
-        // Send verification email using Resend
         const verificationUrl = `${process.env.BASE_URL}/api/auth/verify-email?token=${token}`;
 
         const { data, error } = await resend.emails.send({
@@ -143,7 +134,6 @@ router.post('/register', async (req, res) => {
 
         if (error) {
             console.error('Resend error:', error);
-            // Even if email fails, the user is created
             return res.json({ message: 'User registered successfully. Please contact support for verification.' });
         }
 
@@ -151,13 +141,63 @@ router.post('/register', async (req, res) => {
         res.json({ message: 'User registered successfully. Please check your email to verify your account.' });
 
     } catch (error) {
-        // FIX 4: This is the most important fix for debugging.
-        // The generic error was likely caused by an error object that wasn't being properly logged.
-        console.error('Registration error details:', error); // Enhanced logging
+        console.error('Registration error details:', error);
         res.status(500).json({ error: 'Failed to register user. Please check the server logs for details.' });
     }
 });
 
-// ... (Admin approval endpoints remain the same) ...
+// Admin approval endpoints
+router.get('/admin/pending-users', async (req, res) => {
+    try {
+        const result = await query(`
+            SELECT u.id, u.name, u.email, u.created_at 
+            FROM users u 
+            WHERE u.email_verified = TRUE AND u.admin_approved = FALSE
+            ORDER BY u.created_at DESC
+        `);
+        
+        res.json(result.rows);
+    } catch (error) {
+        console.error('Error fetching pending users:', error);
+        res.status(500).json({ error: 'Failed to fetch pending users' });
+    }
+});
+
+router.post('/admin/approve-user', async (req, res) => {
+    try {
+        const { userId, adminId } = req.body;
+        
+        await query(
+            'UPDATE users SET admin_approved = TRUE WHERE id = $1',
+            [userId]
+        );
+        
+        await query(
+            'INSERT INTO admin_approvals (user_id, status, reviewed_by, reviewed_at) VALUES ($1, $2, $3, NOW())',
+            [userId, 'approved', adminId]
+        );
+        
+        res.json({ message: 'User approved successfully' });
+    } catch (error) {
+        console.error('Error approving user:', error);
+        res.status(500).json({ error: 'Failed to approve user' });
+    }
+});
+
+router.post('/admin/reject-user', async (req, res) => {
+    try {
+        const { userId, adminId, reason } = req.body;
+        
+        await query(
+            'INSERT INTO admin_approvals (user_id, status, reviewed_by, reviewed_at) VALUES ($1, $2, $3, NOW())',
+            [userId, 'rejected', adminId]
+        );
+        
+        res.json({ message: 'User rejected successfully' });
+    } catch (error) {
+        console.error('Error rejecting user:', error);
+        res.status(500).json({ error: 'Failed to reject user' });
+    }
+});
 
 export default router;
