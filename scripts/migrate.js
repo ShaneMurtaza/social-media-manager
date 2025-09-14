@@ -1,7 +1,24 @@
-import { query } from '../db.js';
+import { Pool } from 'pg';
 import dotenv from 'dotenv';
 
 dotenv.config();
+
+// Use the DATABASE_URL from environment variables (provided by Neon.tech and Vercel)
+const connectionString = process.env.DATABASE_URL;
+
+if (!connectionString) {
+  console.error('ERROR: DATABASE_URL environment variable is not set.');
+  process.exit(1);
+}
+
+const pool = new Pool({
+  connectionString: connectionString,
+  // Add this for Neon.tech compatibility
+  ssl: process.env.NODE_ENV === 'production' ? { rejectUnauthorized: false } : false
+});
+
+// Define a query function for this pool
+const query = (text, params) => pool.query(text, params);
 
 const migrations = [
   // Roles table
@@ -46,12 +63,14 @@ const migrations = [
 ];
 
 async function runMigrations() {
+  let client;
   try {
     console.log('Starting database migrations...');
+    client = await pool.connect();
     
     for (const migration of migrations) {
       console.log('Running migration:', migration.substring(0, 50) + '...');
-      await query(migration);
+      await client.query(migration);
     }
     
     console.log('All migrations completed successfully');
@@ -60,7 +79,7 @@ async function runMigrations() {
     const adminUserId = process.env.ADMIN_USER_ID;
     if (adminUserId) {
       console.log('Assigning super_admin role to user ID:', adminUserId);
-      await query(
+      await client.query(
         'INSERT INTO user_roles (user_id, role_id, assigned_by) VALUES ($1, 1, $1) ON CONFLICT DO NOTHING',
         [adminUserId]
       );
@@ -71,6 +90,11 @@ async function runMigrations() {
   } catch (error) {
     console.error('Migration failed:', error);
     process.exit(1);
+  } finally {
+    if (client) {
+      client.release();
+    }
+    await pool.end();
   }
 }
 
