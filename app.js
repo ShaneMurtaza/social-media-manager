@@ -12,17 +12,19 @@ app.use(express.urlencoded({ extended: true, limit: '50mb' }));
 app.use(express.static(path.join(process.cwd(), 'public')));
 
 // API Routes
+import { requireAuth } from './utils/authMiddleware.js';
 import postsRouter from './routes/posts.js';
 import socialAuthRouter from './routes/socialAuth.js';
 import uploadRouter from './routes/upload.js';
 import authRouter from './routes/auth.js';
 import adminRouter from './routes/admin.js';
 
-app.use('/api/admin', adminRouter);
+app.use('/api/admin', requireAuth, adminRouter);
+app.use('/api/posts', requireAuth, postsRouter);
+app.use('/api/upload', requireAuth, uploadRouter);
 app.use('/api/auth', authRouter);
-app.use('/api/posts', postsRouter);
 app.use('/api/auth', socialAuthRouter);
-app.use('/api/upload', uploadRouter);
+
 
 // Add this after your other app.use() routes
 app.get('/api/test-db', async (req, res) => {
